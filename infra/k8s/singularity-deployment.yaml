@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: titan-singularity-brain
+  namespace: singularity
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: singularity-brain
+  template:
+    metadata:
+      labels:
+        app: singularity-brain
+    spec:
+      containers:
+      - name: brain
+        image: nvidia/titan-singularity:latest
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        env:
+        - name: GLOBAL_CONTROL_PLANE
+          value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: singularity-telemetry
+spec:
+  selector:
+    app: singularity-brain
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+---
+apiVersion: scheduling.x-k8s.io/v1alpha1
+kind: PodGroup
+metadata:
+  name: exascale-training-task
+spec:
+  minMember: 64
+  priorityClassName: high-priority

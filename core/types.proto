@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package titan.singularity;
+
+service OrchestrationService {
+  rpc ScheduleTensorTask (TensorTask) returns (TaskAssignment) {}
+  rpc StreamTelemetry (TelemetryRequest) returns (stream TelemetryData) {}
+  rpc NegotiateResources (ResourceRequest) returns (ResourceResponse) {}
+}
+
+message TensorTask {
+  string task_id = 1;
+  string model_id = 2;
+  int32 priority = 3;
+  uint64 parameters = 4;
+  uint32 requested_gpus = 5;
+}
+
+message TaskAssignment {
+  string task_id = 1;
+  string cluster_id = 2;
+  repeated string node_ids = 3;
+  string strategy = 4;
+}
+
+message TelemetryRequest {
+  string cluster_id = 1;
+}
+
+message TelemetryData {
+  uint64 timestamp = 1;
+  float gpu_util = 2;
+  float vram_util = 3;
+  float thermal_level = 4;
+  float power_draw = 5;
+}
+
+message ResourceRequest {
+  string requester_id = 1;
+  uint32 gpu_count = 2;
+}
+
+message ResourceResponse {
+  bool approved = 1;
+  string allocation_id = 2;
+}
